@@ -57,11 +57,12 @@ def pause_func():
     pause_rect.midtop = (window_height/2,window_width/2)
     play_surface.blit(pause_surf,pause_rect)
 
-def draw_func():
+def draw_func(choice=1):
+    # play_surface.blit(image1, (0,25))
+
     #border
     border = Rect((3,23),(window_height-8,window_width-28))
     pygame.draw.rect(play_surface,blue,border, 10) 
-    # play_surface.blit(newSurf, (10,30))
 
     # Draw Snake
     for pos in snake_body:
@@ -73,8 +74,11 @@ def draw_func():
     pygame.Rect(snake_pos[0],snake_pos[1],10,10))
 
     # Draw Food
-    pygame.draw.rect(play_surface, brown,
-    pygame.Rect(food_pos[0],food_pos[1],10,10))
+    # pygame.draw.rect(play_surface, brown,
+    # pygame.Rect(food_pos[0],food_pos[1],10,10))
+    play_surface.blit(apple1_image,(food_pos[0],food_pos[1]))
+    if choice!=1:
+        play_surface.blit(apple2_image,(great_food_pos[0],great_food_pos[1]))
 
 # Pygame initializing
 pygame.init()
@@ -82,9 +86,10 @@ pygame.init()
 # Main Logic of the game
 while True:
     # Increase speed
-    if score  >= speed*level:
+    if rate  >= speed*level:
         speed += 1
         level += 1
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -107,8 +112,6 @@ while True:
                 pygame.event.post(pygame.event.Event(pygame.QUIT))
             if event.key == pygame.K_SPACE:
                 speed +=5
-            if event.key == pygame.K_LCTRL:
-                pygame.time.delay(1)
         elif event.type == KEYUP:
             if event.key == pygame.K_SPACE:
                 speed -=5
@@ -138,18 +141,32 @@ while True:
         if food_spawn == False:
             food_pos = get_food()
         food_spawn = True
+
+        if rate > 0 and rate%5==0:
+            great_food_spawn = True
+            great_food_pos = get_food()
+            rate += 1
+
+        if snake_pos[0] == great_food_pos[0] and snake_pos[1] == great_food_pos[1]:
+            score += 10
+            great_food_spawn = False
+            great_food_pos = [0,0]
     
         # Snake body mechanism
         snake_body.insert(0,list(snake_pos))
         if snake_pos[0] == food_pos[0] and snake_pos[1] == food_pos[1]:
             score += 1
+            rate += 1
             food_spawn = False
         else:
             snake_body.pop()
     
         # Background
         play_surface.fill(white)
-        draw_func()
+        if great_food_spawn == True:
+            draw_func(0)
+        else:
+            draw_func()
         # Bound
         if snake_pos[0] > window_height-20 or snake_pos[0] < 10:
             game_over()
@@ -168,7 +185,10 @@ while True:
     elif state == PAUSE:
         play_surface.fill(white)
         time.sleep(0.5)
-        draw_func()
+        if great_food_spawn == True:
+            draw_func(0)
+        else:
+            draw_func()
         pause_func()
         show_score()
         show_level()
