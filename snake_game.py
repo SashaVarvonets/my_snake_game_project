@@ -6,12 +6,13 @@ from pygame.locals import *
 from variables import *
 
 def main():
-    global fps_controller, play_surface
+    global fps_controller, play_surface, snake_font
 
     pygame.init()
     fps_controller = pygame.time.Clock()
-    play_surface = pygame.display.set_mode((window_height,window_width))
+    play_surface = pygame.display.set_mode((window_width,window_height))
     pygame.display.set_caption('Snake Game')
+    snake_font = pygame.font.Font('freesansbold.ttf', int(window_height/18))
 
     showStartScreen()
     while True:
@@ -29,9 +30,10 @@ def run_game():
     great_food_pos = [0,0]
     great_food_spawn = False
 
-
-    snake_pos = [50,50]
-    snake_body = [[50,50],[40,50],[30,50]]
+    start_x = random.randint(5, window_width_size - 6)
+    start_y = random.randint(5, window_height_size - 6)
+    snake_pos = [start_x,start_y]
+    snake_body = [[start_x,start_y],[start_x-1,start_y],[start_x-2,start_y]]
     direction = 'RIGHT'
     changeto = direction
     # Main Logic of the game
@@ -40,7 +42,6 @@ def run_game():
         if rate  >= speed*level:
             speed += 1
             level += 1
-            print(speed)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -80,13 +81,13 @@ def run_game():
         
             # Update snake position[x,y]
             if direction == 'RIGHT':
-                snake_pos[0] +=10
+                snake_pos[0] +=1
             if direction == 'LEFT':
-                snake_pos[0] -= 10
+                snake_pos[0] -= 1
             if direction == 'UP':
-                snake_pos[1] -= 10
+                snake_pos[1] -= 1
             if direction == 'DOWN':
-                snake_pos[1] += 10
+                snake_pos[1] += 1
         
             # Food spawn
             if food_spawn == False:
@@ -96,9 +97,12 @@ def run_game():
             if rate > 0 and rate%5==0:
                 great_food_spawn = True
                 great_food_pos = get_food()
+                start_time()
                 rate += 1
 
-    
+            if great_food_spawn == True:
+                stop_time()
+
             if snake_pos[0] == great_food_pos[0] and snake_pos[1] == great_food_pos[1]:
                 score += 10
                 great_food_spawn = False
@@ -114,15 +118,15 @@ def run_game():
                 snake_body.pop()
         
             # Background
-            play_surface.fill(white)
+            play_surface.fill(black)
             if great_food_spawn == True:
                 draw_func(0)
             else:
                 draw_func()
             # Bound
-            if snake_pos[0] > window_height-20 or snake_pos[0] < 10:
+            if snake_pos[0] > window_width_size-2 or snake_pos[0] < 0:
                 return #game_over
-            if snake_pos[1] > window_width-20 or snake_pos[1] < 25:
+            if snake_pos[1] > window_height_size-2 or snake_pos[1] < 0:
                 return #game_over
         
             for block in snake_body[1:]:
@@ -135,7 +139,7 @@ def run_game():
             fps_controller.tick(speed)
     
         elif state == PAUSE:
-            play_surface.fill(white)
+            play_surface.fill(black)
             if great_food_spawn == True:
                 draw_func(0)
             else:
@@ -146,9 +150,21 @@ def run_game():
             pygame.display.flip()
             fps_controller.tick(speed)
 
+def start_time():
+    global last
+    last = pygame.time.get_ticks()
+
+def stop_time():
+    global now, great_food_spawn, great_food_pos
+    now = pygame.time.get_ticks()
+    cooldawn = 5000
+    if now - last >= cooldawn:
+        great_food_spawn = False
+        great_food_pos = [0,0]
+
 def showStartScreen():
     while True:
-        play_surface.fill(white)
+        play_surface.fill(black)
         drawPressKeyMsg()
         if checkForKeyPress():
             pygame.event.get() # clear event queue
@@ -157,10 +173,9 @@ def showStartScreen():
         fps_controller.tick(speed)
 
 def drawPressKeyMsg():
-    press_font = pygame.font.SysFont('monaco',int(window_height/20))
-    pressKeySurf = press_font.render('Press any key to start', True, black)
+    pressKeySurf = snake_font.render('Press any key to start', True, white)
     pressKeyRect = pressKeySurf.get_rect()
-    pressKeyRect.midtop = (window_height/2,window_width - window_width/5)
+    pressKeyRect.midtop = (window_width/2,window_height - window_height/5)
     play_surface.blit(pressKeySurf, pressKeyRect)
 
 def checkForKeyPress():
@@ -179,68 +194,84 @@ def checkForKeyPress():
 
 # Score function
 def show_score(choice=1):
-    score_font = pygame.font.SysFont('monaco', window_height//25)
-    score_surf = score_font.render('Score: {0}'.format(score),True, black)
+    score_surf = snake_font.render('Score: {0}'.format(score),True, white)
     score_rect = score_surf.get_rect()
     if choice == 1:
-        score_rect.midtop = (window_height/10,5)
+        score_rect.midtop = (window_width/10,snake_size)
     else:
-        score_rect.midtop = (window_height//5*2,window_width//4*1)
+        score_rect.midtop = (window_width//5*3,window_height//4*1)
     play_surface.blit(score_surf,score_rect)
 
- 
+
 def show_level(choice=1):
-    score_font = pygame.font.SysFont('monaco', int(window_height//25))
-    score_surf = score_font.render('Level: {0}'.format(level),True, black)
+    score_surf = snake_font.render('Level: {0}'.format(level),True, white)
     score_rect = score_surf.get_rect()
     if choice == 1:
-        score_rect.midtop = (window_height-(window_height/10),5)
+        score_rect.midtop = (window_width-(window_width/10),snake_size)
     else:
-        score_rect.midtop = (window_height//5*3,window_width//4*1)
+        score_rect.midtop = (window_width/5*2,window_height/4*1)
     play_surface.blit(score_surf,score_rect)
 
 # Getting food function
 def get_food():
-    get_pos = [random.randrange(1,(window_height-10)/10)*10,\
-               random.randrange(3,(window_width-10)/10)*10]
+    get_pos = [random.randrange(1,window_width_size-1),\
+               random.randrange(3,window_height_size-1)]
     if get_pos in list(snake_body):
         return get_food()
     else:
         return get_pos
 
 def pause_func():
-    pause_font = pygame.font.SysFont('monaco', int(window_height/7.5))
-    pause_surf = pause_font.render('Pause', True, black)
+    pause_font = pygame.font.SysFont('freesansbold.ttf', int(window_height/7.5))
+    pause_surf = pause_font.render('Pause', True, white)
     pause_rect = pause_surf.get_rect()
-    pause_rect.midtop = (window_height/2,window_width/2)
+    pause_rect.midtop = (window_width/2,window_height/2)
     play_surface.blit(pause_surf,pause_rect)
 
 def draw_func(choice=1):
-    # play_surface.blit(image1, (0,25))
-
     #border
-    border = Rect((3,23),(window_height-8,window_width-28))
-    pygame.draw.rect(play_surface,blue,border, 10) 
+    border = Rect((0,0),(window_width,window_height))
+    pygame.draw.rect(play_surface,dark_green,border, snake_size)
 
-    # Draw Snake
+
+    #draw grid
+    for x in range(int(snake_size/2), window_width, snake_size): # draw vertical lines
+        pygame.draw.line(play_surface, grey, (x, snake_size/2), (x, window_height-snake_size/2))
+    for y in range(int(snake_size/2), window_height, snake_size): # draw horizontal lines
+        pygame.draw.line(play_surface, grey, (snake_size/2, y), (window_width-snake_size/2, y))
+
+
+
+    # Draw Snake body
     for pos in snake_body:
         pygame.draw.rect(play_surface, green,
-        pygame.Rect(pos[0]-1,pos[1]-1,11,11),2)
+        pygame.Rect(pos[0]*snake_size+snake_size/2,pos[1]*snake_size+snake_size/2,snake_size,snake_size),2)
 
     # Draw head
     pygame.draw.rect(play_surface, dark_green,
-    pygame.Rect(snake_pos[0],snake_pos[1],10,10))
+    pygame.Rect(snake_pos[0]*snake_size+snake_size/2+2,snake_pos[1]*snake_size+snake_size/2+2,snake_size-3,snake_size-3))
 
-    play_surface.blit(apple1_image,(food_pos[0],food_pos[1]))
-    if choice!=1:
-        play_surface.blit(apple2_image,(great_food_pos[0],great_food_pos[1]))
+    # Draw food
+    if snake_size == 10:
+        play_surface.blit(apple1_image,(food_pos[0]*snake_size+snake_size/2,food_pos[1]*snake_size+snake_size/2))
+        if choice!=1:
+            play_surface.blit(apple2_image,(great_food_pos[0]*snake_size+snake_size/2,\
+                                        great_food_pos[1]*snake_size+snake_size/2))
+    elif snake_size == 20:
+        play_surface.blit(apple_red_20,(food_pos[0]*snake_size+snake_size/2,food_pos[1]*snake_size+snake_size/2))
+        if choice!=1:
+            play_surface.blit(apple_black_20,(great_food_pos[0]*snake_size+snake_size/2,\
+                                        great_food_pos[1]*snake_size+snake_size/2))
+    else:
+        pygame.draw.rect(play_surface, red,
+        pygame.Rect(food_pos[0]*snake_size+snake_size/2+1,food_pos[1]*snake_size+snake_size/2+1,snake_size,snake_size))
 
 # Game over function
 def game_over():
-    game_over_font = pygame.font.SysFont('monaco',100)
+    game_over_font = pygame.font.SysFont('freesansbold.ttf',100)
     game_over_surf = game_over_font.render('Game over!',True, red)
     game_over_rect = game_over_surf.get_rect()
-    game_over_rect.midtop = (window_height/2,window_width/5*2)
+    game_over_rect.midtop = (window_width/2,window_height/5*2)
     play_surface.blit(game_over_surf,game_over_rect)
     show_score(0)
     show_level(0)
