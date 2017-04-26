@@ -1,10 +1,10 @@
-import pygame, random, time, os
-from pygame.locals import * 
+import pygame
+
 pygame.init()
 
 # Window options
-window_width = 600
-window_height = 400
+window_width = 800
+window_height = 600
 # Image1 = pygame.image.load(os.path.join('image','image2.jpg'))
 
 snake_size = 20
@@ -18,10 +18,13 @@ window_height_size = int(window_height / snake_size)
 food_spawn = False
 great_food_spawn = False
 great_food_pos = [0,0]
-apple1_image = pygame.image.load(os.path.join('image','apple1.png'))
-apple2_image = pygame.image.load(os.path.join('image','apple2.png'))
-apple_red_20 = pygame.image.load(os.path.join('image','yabloko20na20.png'))
-apple_black_20 = pygame.image.load(os.path.join('image','apple20na20 .png'))
+# apple images
+apple_red_10 = pygame.image.load('red10.png')
+apple_white_10 = pygame.image.load('white10.png')
+apple_red_20 = pygame.image.load('red20.png')
+apple_white_20 = pygame.image.load('white20.png')
+apple_red_40 = pygame.image.load('red40.png')
+apple_white_40 = pygame.image.load('white40.png')
 
 # Colors RGB
 red = pygame.Color(255,0,0) # Gameover
@@ -33,7 +36,7 @@ brown = pygame.Color(165,42,42) #Food
 grey = pygame.Color(40,40,40) # Border
 
 # Speed and level options
-speed = 5
+speed = 3
 score = 0
 rate = 0
 level = 1

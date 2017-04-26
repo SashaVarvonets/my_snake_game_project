@@ -4,7 +4,6 @@
 import sys
 import random
 import time
-import os
 import pygame
 
 from pygame.locals import * 
@@ -19,7 +18,7 @@ def main():
     pygame.display.set_caption('Snake Game')
     snake_font = pygame.font.Font('freesansbold.ttf', int(window_height/18))
 
-    showStartScreen()
+    show_start_screen()
     while True:
         run_game()
         game_over()
@@ -29,14 +28,14 @@ def run_game():
            snake_body, snake_pos, great_food_pos,\
            great_food_spawn, food_pos 
 
-    speed = 3
+    speed = 4
     score = 0
     rate = 0
     level = 1
     great_food_pos = [0, 0]
     great_food_spawn = False
 
-    start_x = random.randint(5, window_width_size - 6)
+    start_x = random.randint(5, window_width_size - 10)
     start_y = random.randint(5, window_height_size - 6)
     snake_pos = [start_x, start_y]
     snake_body = [[start_x, start_y], [start_x-1, start_y], [start_x-2, start_y]]
@@ -45,7 +44,7 @@ def run_game():
     # Main Logic of the game
     while True:
         # Increase speed
-        if rate  >= speed*level:
+        if rate  >= speed*level*2:
             speed += 1
             level += 1
 
@@ -101,7 +100,7 @@ def run_game():
                 food_spawn = True
             
             # Get Great food and start timing
-            if rate > 0 and rate%5 == 0:
+            if rate > 0 and rate%8 == 0:
                 great_food_spawn = True
                 great_food_pos = get_food()
                 start_time()
@@ -177,10 +176,15 @@ def stop_time():
         great_food_pos = [0,0]
 
 # Start scene
-def showStartScreen():
+def show_start_screen():
     while True:
         play_surface.fill(black)
-        drawPressKeyMsg()
+        start_font = pygame.font.SysFont('freesansbold.ttf', 100)
+        start_surf = start_font.render('START', True, dark_green)
+        start_rect = start_surf.get_rect()
+        start_rect.midtop = (window_width/2, window_height/5*2)
+        play_surface.blit(start_surf, start_rect)
+        draw_start()
         if checkForKeyPress():
             pygame.event.get() # clear event queue
             return
@@ -188,7 +192,8 @@ def showStartScreen():
         fps_controller.tick(speed)
 
 
-def drawPressKeyMsg():
+def draw_start():
+    #Press key str
     pressKeySurf = snake_font.render('Press any key to start', True, white)
     pressKeyRect = pressKeySurf.get_rect()
     pressKeyRect.midtop = (window_width/2, window_height - window_height/5)
@@ -201,7 +206,7 @@ def checkForKeyPress():
 
     keyUpEvents = pygame.event.get(KEYUP)
     if len(keyUpEvents) == 0:
-        return None
+        return
     if keyUpEvents[0].key == K_ESCAPE:
         pygame.quit()
         sys.exit()
@@ -212,7 +217,7 @@ def show_score(choice=1):
     score_surf = snake_font.render('Score: {0}'.format(score), True, white)
     score_rect = score_surf.get_rect()
     if choice == 1:
-        score_rect.midtop = (window_width/10, snake_size)# Normal position
+        score_rect.midtop = (window_width/9, snake_size)# Normal position
     else:
         score_rect.midtop = (window_width//5*3, window_height//4*1) # Game over position
     play_surface.blit(score_surf, score_rect)
@@ -222,7 +227,7 @@ def show_level(choice=1):
     score_surf = snake_font.render('Level: {0}'.format(level), True, white)
     score_rect = score_surf.get_rect()
     if choice == 1:
-        score_rect.midtop = (window_width-(window_width/10), snake_size) # Normal position
+        score_rect.midtop = (window_width-(window_width/9), snake_size) # Normal position
     else:
         score_rect.midtop = (window_width/5*2, window_height/4*1) # Game over position
     play_surface.blit(score_surf, score_rect)
@@ -276,11 +281,11 @@ def draw_func(choice=1):
     # Draw food
     if snake_size == 10:
         # Normal apple
-        play_surface.blit(apple1_image,
+        play_surface.blit(apple_red_10,
                          (food_pos[0]*snake_size+snake_size/2,
                           food_pos[1]*snake_size+snake_size/2))
         if choice!=1: # Great apple
-            play_surface.blit(apple2_image,
+            play_surface.blit(apple_white_10,
                              (great_food_pos[0]*snake_size+snake_size/2,\
                               great_food_pos[1]*snake_size+snake_size/2))
     elif snake_size == 20:
@@ -289,7 +294,16 @@ def draw_func(choice=1):
                          (food_pos[0]*snake_size+snake_size/2,
                           food_pos[1]*snake_size+snake_size/2))
         if choice!=1: # Great apple
-            play_surface.blit(apple_black_20,
+            play_surface.blit(apple_white_20,
+                             (great_food_pos[0]*snake_size+snake_size/2,\
+                              great_food_pos[1]*snake_size+snake_size/2))
+    elif snake_size == 40:
+        # Normal apple
+        play_surface.blit(apple_red_40,
+                         (food_pos[0]*snake_size+snake_size/2,
+                          food_pos[1]*snake_size+snake_size/2))
+        if choice!=1: # Great apple
+            play_surface.blit(apple_white_40,
                              (great_food_pos[0]*snake_size+snake_size/2,\
                               great_food_pos[1]*snake_size+snake_size/2))
     else:
@@ -314,15 +328,15 @@ def game_over():
     play_surface.blit(game_over_surf, game_over_rect)
     show_score(0)
     show_level(0)
-    drawPressKeyMsg()
+    draw_start()
     pygame.display.flip()
-    pygame.time.wait(500)
     checkForKeyPress() # clear out any key presses in the event queue
-
     while True:
+
         if checkForKeyPress():
             pygame.event.get() # clear event queue
             return
+    pygame.quit()
     sys.exit()
 
 if __name__ == '__main__':
