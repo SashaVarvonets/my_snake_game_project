@@ -39,6 +39,7 @@ grey = pygame.Color(40, 40, 40)  # Border
 
 
 def draw_menu(game_status):
+    pygame.display.set_caption('Snake Game')
     play_surface.fill(black)
     if game_status:
         surface = snake_font.render('START GAME!', True, dark_green)
