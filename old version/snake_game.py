@@ -161,7 +161,7 @@ def run_game():
             pygame.display.flip()
             fps_controller.tick(speed)
 
-# Start timing func for great food
+
 def start_time():
     global last
     last = pygame.time.get_ticks()
