@@ -2,12 +2,12 @@ import pygame
 import sys
 import random
 
-from drow_functions import window_width_size, window_height_size
+from draw_functions import window_width_size, window_height_size
 
 # Import funcs to draw start menu
-from drow_functions import draw_menu, draw_score, draw_level
+from draw_functions import draw_menu, draw_score, draw_level
 # Import funcs to draw game process
-from drow_functions import draw_background, draw_snake, draw_food, draw_great_food, draw_pause
+from draw_functions import draw_background, draw_snake, draw_food, draw_great_food, draw_pause
 
 
 pygame.init()
@@ -45,17 +45,22 @@ def check_for_key_press():
         pygame.quit()
         sys.exit()
     elif events[0].type == pygame.KEYDOWN:
-        if events[0].key != pygame.K_ESCAPE:
-            return True
-        else:
+        if events[0].key == pygame.K_ESCAPE:
             pygame.quit()
             sys.exit()
+        elif events[0].key == pygame.K_SPACE:
+            return True
 
 
 def run_game():
     global speed, rate, level, score, game_status
 
     global food_pos, food_spawn, great_food_pos, great_food_spawn
+
+    speed = 3
+    score = 0
+    rate = 0
+    level = 1
 
     running_game = True
 
@@ -73,7 +78,6 @@ def run_game():
             level += 1
 
         for event in pygame.event.get():
-            print(event)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -94,10 +98,10 @@ def run_game():
                     changeto = 'DOWN'
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
                     speed += 5
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
                     speed -= 5
 
         # Game scene

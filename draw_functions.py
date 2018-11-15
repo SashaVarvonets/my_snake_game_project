@@ -49,7 +49,7 @@ def draw_menu(game_status):
     start_rect.midtop = (window_width / 2, window_height / 5 * 2)
     play_surface.blit(surface, start_rect)
 
-    press_key_surf = snake_font.render('Press any key to start', True, white)
+    press_key_surf = snake_font.render('Press SPACE to start', True, white)
     press_key_rect = press_key_surf.get_rect()
     press_key_rect.midtop = (window_width / 2, window_height - window_height / 5)
     play_surface.blit(press_key_surf, press_key_rect)
