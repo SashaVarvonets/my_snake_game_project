@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 import pygame
 
@@ -6,9 +7,9 @@ from functions import show_menu_screen, run_game
 
 DEBUG = int(os.environ.get('DEBUG', '0'))
 
-# ============================================= GAME DRAW VARIABLE==================================================
+# ============================================= GAME DRAWING VARIABLES =================================================
 # Cell sizes in pixels
-cell_size = 10
+cell_size = 20
 # Window width and height in pixels
 window_w_in_pixels = 800
 window_h_in_pixels = 600
@@ -29,10 +30,10 @@ brown = pygame.Color(165, 42, 42)  # Food
 grey = pygame.Color(40, 40, 40)  # Border
 
 # fonts
-snake_font = pygame.font.Font('freesansbold.ttf', int(window_h_in_cells / 20))
+snake_font = pygame.font.Font('freesansbold.ttf', int(window_w_in_pixels / 20))
 
 # =====================================================================================================================
-# ============================================= GAME PROCESS VARIABLE==================================================
+# ============================================ GAME PROCESSING VARIABLE================================================
 pygame.init()
 play_surface = pygame.display.set_mode((window_w_in_pixels, window_h_in_pixels))
 fps_controller = pygame.time.Clock()
@@ -49,7 +50,7 @@ class Game:
     def __init__(self):
         self.score = 0
         self.level = 0
-        self.speed = 0
+        self.speed = 3
 
         self.GAME_CONDITION = "WAITING"
 
@@ -60,7 +61,7 @@ class Game:
             snake.draw()
             # food.draw()
         elif self.GAME_CONDITION in ("WAITING", "GAME OVER"):
-            self.draw_menu()
+            self.draw_start_menu()
         elif self.GAME_CONDITION == "PAUSE":
             self.draw_pause()
         self.draw_score()
@@ -68,7 +69,7 @@ class Game:
         pygame.display.flip()
         fps_controller.tick(self.speed)
 
-    def draw_menu(self):
+    def draw_start_menu(self):
         pygame.display.set_caption('Snake Game')
         play_surface.fill(black)
 
@@ -131,57 +132,64 @@ class Game:
 
     # ============================================== GAME MECHANISM ==================================================
 
-    def check_button_click(self):
-        new_direction = None
+    def get_key_press(self):
+        pressed_key = None
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            # Quit the game
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == ord('p'):
-                    self.GAME_CONDITION = "PAUSE"
-                if event.key == ord('o'):
-                    self.GAME_CONDITION = "RUNNING"
-                if event.key == pygame.K_RIGHT or event.key == ord('d'):
-                    new_direction = 'RIGHT'
-                if event.key == pygame.K_LEFT or event.key == ord('a'):
-                    new_direction = 'LEFT'
-                if event.key == pygame.K_UP or event.key == ord('w'):
-                    new_direction = 'UP'
-                if event.key == pygame.K_DOWN or event.key == ord('s'):
-                    new_direction = 'DOWN'
-                if event.key == pygame.K_ESCAPE:
-                    pygame.event.post(pygame.event.Event(pygame.QUIT))
-                if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
-                    self.speed += 5
+            elif self.GAME_CONDITION == "RUNNING":
+                # if event.key == ord('p'):  # pause the game
+                #     self.GAME_CONDITION = "PAUSE"
+                #     break
+                # elif event.key == ord('o'):  # run game back from pause
+                #     self.GAME_CONDITION = "RUNNING"
+                #     break
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT or event.key == ord('d'):
+                        pressed_key = 'RIGHT'
+                    if event.key == pygame.K_LEFT or event.key == ord('a'):
+                        pressed_key = 'LEFT'
+                    if event.key == pygame.K_UP or event.key == ord('w'):
+                        pressed_key = 'UP'
+                    if event.key == pygame.K_DOWN or event.key == ord('s'):
+                        pressed_key = 'DOWN'
+
+                    if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
+                        self.speed += 5
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
+                        self.speed -= 5
                 break
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
-                    self.speed -= 5
-                break
-        return new_direction
+
+            elif self.GAME_CONDITION in ("WAITING", "GAME OVER"):
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    pressed_key = "START"
+        return pressed_key
 
 
 class Snake:
     def __init__(self):
         self.head = [
-            random.randint(cell_size, window_w_in_cells - cell_size),
-            random.randint(cell_size, window_h_in_cells - cell_size)
+            random.randint(5, window_w_in_cells - cell_size),
+            random.randint(5, window_h_in_cells - cell_size)
         ]
         self.body = [[self.head[X] - 1, self.head[Y]], [self.head[X] - 2, self.head[Y]]]
         self.current_direction = "RIGHT"
+        self.reached_food = False
 
     def draw(self):
         # Draw Snake body
         for el in self.body:
             rect_body = pygame.Rect(el[X] * cell_size + cell_size / 2, el[Y] * cell_size + cell_size / 2,
                                     cell_size, cell_size)
-            pygame.draw.rect(play_surface, green, rect_body, 2)
+            pygame.draw.rect(play_surface, dark_green, rect_body, 2)
 
         # Draw head
         rect_head = pygame.Rect(self.head[X] * cell_size + cell_size / 2 + 2,
                                 self.head[Y] * cell_size + cell_size / 2 + 2, cell_size - 3, cell_size - 3)
-        pygame.draw.rect(play_surface, dark_green, rect_head)
+        pygame.draw.rect(play_surface, green, rect_head)
 
     def change_direction(self, new_direction):
         if new_direction == 'RIGHT' and self.current_direction != 'LEFT':
@@ -193,9 +201,8 @@ class Snake:
         elif new_direction == 'DOWN' and self.current_direction != 'UP':
             self.current_direction = 'DOWN'
 
-    def make_step(self, food, bonus_food=None):
-
-        self.body.insert(0, self.head)
+    def make_step(self):
+        self.body.insert(0, self.head.copy())
 
         if self.current_direction == 'RIGHT':
             self.head[X] += 1
@@ -206,13 +213,17 @@ class Snake:
         elif self.current_direction == 'DOWN':
             self.head[Y] += 1
 
-        if food.position == self.head:
-            food.change_position()
+        if self.head in self.body:
+            raise  # Collision with body
+
+        if not (0 <= self.head[X] <= window_w_in_cells) or not (0 <= self.head[Y] <= window_h_in_cells):
+            raise  # Collision with border
+
+        # If food has been reached, then the body of the snake lengthens (the last element is not removed)
+        if self.reached_food:
+            self.reached_food = False
         else:
             self.body.pop()
-
-        if bonus_food and bonus_food.position == self.head:
-            bonus_food.change_position()
 
 
 class Food:
@@ -239,6 +250,13 @@ class Food:
                                      cell_size - 1, cell_size - 1)
             pygame.draw.rect(play_surface, self.default_color, rect_apple)
 
+    def find_new_place(self, snake):
+        new_place = [random.randrange(1, window_w_in_cells - 1), random.randrange(3, window_h_in_cells - 1)]
+        if new_place in snake.body or new_place == snake.head:
+            return self.find_new_place(snake)
+        else:
+            return new_place
+
 
 class BonusFood(Food):
     bonus_apple_images = {
@@ -257,27 +275,27 @@ class BonusFood(Food):
 def start_test_game():
     snake = Snake()
     game = Game()
+    food = Food()
 
     RUN = True
     while RUN:
+        key_press = game.get_key_press()
         if game.GAME_CONDITION == "RUNNING":
-            pass
-            """
-            change snake position
-            check for collision with border or snake body
-            draw snake
-            """
+            if key_press:
+                snake.change_direction(key_press)
+            try:
+                snake.make_step()
+            except:
+                snake = Snake()
+                game = Game()
+            # if snake.head == food.position:
+            #     game.update_score()
+            #     food.find_new_place(snake)
+            #     snake.reached_food=True
+
         elif game.GAME_CONDITION in ("WAITING", "GAME OVER"):
-            pass
-            """
-            waiting for pressing the start button
-            change game status
-            """
-        elif game.GAME_CONDITION == "PAUSE":
-            """
-            Waiting for pressing the continue button
-            """
-            pass
+            if key_press:
+                game.GAME_CONDITION = 'RUNNING'
 
         game.draw_screen(snake)
 
@@ -289,6 +307,12 @@ def start_game():
 
 
 if __name__ == '__main__':
+    # TODO:
+    #  - add option to play with|without border
+    #  - save score in DB with name
+    #  - see top 10 cores with names
+    #  - add option to choose cell size
+
     if DEBUG:
         start_test_game()
         import pygame
