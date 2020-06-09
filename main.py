@@ -54,12 +54,12 @@ class Game:
 
         self.GAME_CONDITION = "WAITING"
 
-    def draw_screen(self, snake):
+    def draw_screen(self, snake, food):
 
         if self.GAME_CONDITION == "RUNNING":
             self.draw_background()
             snake.draw()
-            # food.draw()
+            food.draw()
         elif self.GAME_CONDITION in ("WAITING", "GAME OVER"):
             self.draw_start_menu()
         elif self.GAME_CONDITION == "PAUSE":
@@ -100,7 +100,7 @@ class Game:
         score_surf = snake_font.render('Level: {0}'.format(self.level), True, white)
         score_rect = score_surf.get_rect()
         if self.GAME_CONDITION == "RUNNING":
-            score_rect.midtop = (window_w_in_pixels - (window_h_in_pixels/9), cell_size)  # Normal position
+            score_rect.midtop = (window_w_in_pixels - (window_h_in_pixels/7), cell_size)  # Normal position
         else:
             score_rect.midtop = (window_w_in_pixels/5, window_h_in_pixels/10)  # Game over position
         play_surface.blit(score_surf, score_rect)
@@ -216,7 +216,8 @@ class Snake:
         if self.head in self.body:
             raise  # Collision with body
 
-        if not (0 <= self.head[X] <= window_w_in_cells) or not (0 <= self.head[Y] <= window_h_in_cells):
+        # if not (left_border < head-X < right_border) or not (ceiling_border < head-Y < bottom_border)
+        if not (-1 < self.head[X] < window_w_in_cells - 1) or not (-1 < self.head[Y] < window_h_in_cells - 1):
             raise  # Collision with border
 
         # If food has been reached, then the body of the snake lengthens (the last element is not removed)
@@ -253,9 +254,9 @@ class Food:
     def find_new_place(self, snake):
         new_place = [random.randrange(1, window_w_in_cells - 1), random.randrange(3, window_h_in_cells - 1)]
         if new_place in snake.body or new_place == snake.head:
-            return self.find_new_place(snake)
+            self.find_new_place(snake)
         else:
-            return new_place
+            self.position = new_place
 
 
 class BonusFood(Food):
@@ -276,6 +277,7 @@ def start_test_game():
     snake = Snake()
     game = Game()
     food = Food()
+    food.find_new_place(snake)
 
     RUN = True
     while RUN:
@@ -288,16 +290,16 @@ def start_test_game():
             except:
                 snake = Snake()
                 game = Game()
-            # if snake.head == food.position:
-            #     game.update_score()
-            #     food.find_new_place(snake)
-            #     snake.reached_food=True
+            if snake.head == food.position:
+                # game.update_score()
+                food.find_new_place(snake)
+                snake.reached_food = True
 
         elif game.GAME_CONDITION in ("WAITING", "GAME OVER"):
             if key_press:
                 game.GAME_CONDITION = 'RUNNING'
 
-        game.draw_screen(snake)
+        game.draw_screen(snake, food)
 
 
 def start_game():
