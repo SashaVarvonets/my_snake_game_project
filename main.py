@@ -48,7 +48,7 @@ class Game:
     Game could be in 1 of 4 conditions: "WAITING" | "RUNNING" | "PAUSE" | "GAME OVER"
     """
     def __init__(self):
-        self.score = 0
+        self.score = 1
         self.level = 0
         self.speed = 3
 
@@ -175,6 +175,11 @@ class Game:
             self.level += 1
             self.speed += 1
 
+    def reset_stat(self):
+        self.score = 0
+        self.level = 1
+        self.speed = 3
+
 
 class Snake:
     def __init__(self):
@@ -297,7 +302,7 @@ def start_test_game():
                 snake.make_step()
             except:
                 snake = Snake()
-                game = Game()
+                game.GAME_CONDITION = 'GAME OVER'
 
             if snake.head == food.position:
                 game.update_score()
@@ -306,6 +311,7 @@ def start_test_game():
 
         elif game.GAME_CONDITION in ("WAITING", "GAME OVER"):
             if key_press:
+                game.reset_stat()
                 game.GAME_CONDITION = 'RUNNING'
 
         game.draw_screen(snake, food)
@@ -323,6 +329,7 @@ if __name__ == '__main__':
     #  - save score in DB with name
     #  - see top 10 cores with names
     #  - add option to choose cell size
+    #  - add sound and music
 
     if DEBUG:
         start_test_game()
