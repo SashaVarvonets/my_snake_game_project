@@ -168,6 +168,13 @@ class Game:
                     pressed_key = "START"
         return pressed_key
 
+    def update_score(self):
+        self.score += 1
+
+        if self.score % 2 == 0:
+            self.level += 1
+            self.speed += 1
+
 
 class Snake:
     def __init__(self):
@@ -285,13 +292,15 @@ def start_test_game():
         if game.GAME_CONDITION == "RUNNING":
             if key_press:
                 snake.change_direction(key_press)
+
             try:
                 snake.make_step()
             except:
                 snake = Snake()
                 game = Game()
+
             if snake.head == food.position:
-                # game.update_score()
+                game.update_score()
                 food.find_new_place(snake)
                 snake.reached_food = True
 
