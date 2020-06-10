@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 import random
 import pygame
 
@@ -54,12 +55,14 @@ class Game:
 
         self.GAME_CONDITION = "WAITING"
 
-    def draw_screen(self, snake, food):
+    def draw_screen(self, snake, food, bonus_food):
 
         if self.GAME_CONDITION == "RUNNING":
             self.draw_background()
             snake.draw()
             food.draw()
+            if bonus_food.position != [0, 0]:
+                bonus_food.draw()
         elif self.GAME_CONDITION in ("WAITING", "GAME OVER"):
             self.draw_start_menu()
         elif self.GAME_CONDITION == "PAUSE":
@@ -168,10 +171,10 @@ class Game:
                     pressed_key = "START"
         return pressed_key
 
-    def update_score(self):
-        self.score += 1
+    def update_score(self, points=1):
+        self.score += points
 
-        if self.score % 2 == 0:
+        if self.score / 10 >= self.level:
             self.level += 1
             self.speed += 1
 
@@ -282,14 +285,24 @@ class BonusFood(Food):
         super().__init__()
         self.picture = self.bonus_apple_images.get(cell_size, None)
         self.default_color = white
-        self.position = []
+        self.position = [0, 0]
+        self.timer = None
+
+    def start_timer(self):
+        self.timer = time.time()
+
+    def check_timer(self):
+        now = time.time()
+        if now - self.timer > 5:  # Hide bonus food
+            self.position = [0, 0]
+            self.timer = None
 
 
 def start_test_game():
     snake = Snake()
     game = Game()
     food = Food()
-    food.find_new_place(snake)
+    bonus_food = BonusFood()
 
     RUN = True
     while RUN:
@@ -301,20 +314,32 @@ def start_test_game():
             try:
                 snake.make_step()
             except:
-                snake = Snake()
                 game.GAME_CONDITION = 'GAME OVER'
 
             if snake.head == food.position:
+                # adding bonus only if food was eaten and only when update a score (to avoid reappearance bonus food)
+                if bonus_food.position == [0, 0] and game.score > 7 and game.score % 8 == 0:
+                    bonus_food.find_new_place(snake)
+                    bonus_food.start_timer()
+
                 game.update_score()
                 food.find_new_place(snake)
                 snake.reached_food = True
 
+            if snake.head == bonus_food.position:
+                game.update_score(5)
+                bonus_food.position = [0, 0]
+            elif bonus_food.position != [0, 0]:
+                bonus_food.check_timer()
+
         elif game.GAME_CONDITION in ("WAITING", "GAME OVER"):
             if key_press:
                 game.reset_stat()
+                snake = Snake()
+                food.find_new_place(snake)
                 game.GAME_CONDITION = 'RUNNING'
 
-        game.draw_screen(snake, food)
+        game.draw_screen(snake, food, bonus_food)
 
 
 def start_game():
