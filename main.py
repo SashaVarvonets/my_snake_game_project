@@ -141,10 +141,10 @@ class Game:
                 pygame.quit()
                 sys.exit()
             elif self.GAME_CONDITION == "RUNNING":
-                if event.key == ord('p'):  # pause the game
-                    self.GAME_CONDITION = "PAUSE"
-                    break
                 if event.type == pygame.KEYDOWN:
+                    if event.key == ord('p'):  # pause the game
+                        self.GAME_CONDITION = "PAUSE"
+                        break
                     if event.key == pygame.K_RIGHT or event.key == ord('d'):
                         pressed_key = 'RIGHT'
                     if event.key == pygame.K_LEFT or event.key == ord('a'):
@@ -175,7 +175,7 @@ class Game:
 
         if self.score / 10 >= self.level:
             self.level += 1
-            self.speed += 1
+            self.speed += 1 if self.speed < 8 else 0
 
     def reset_stat(self):
         self.score = 0
@@ -326,7 +326,7 @@ def start_game():
                 snake.reached_food = True
 
             if snake.head == bonus_food.position:
-                game.update_score(5)
+                game.update_score(4)
                 bonus_food.position = [0, 0]
             elif bonus_food.position != [0, 0]:
                 bonus_food.check_timer()
