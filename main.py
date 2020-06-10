@@ -4,8 +4,6 @@ import time
 import random
 import pygame
 
-from functions import show_menu_screen, run_game
-
 DEBUG = int(os.environ.get('DEBUG', '0'))
 
 # ============================================= GAME DRAWING VARIABLES =================================================
@@ -31,11 +29,11 @@ brown = pygame.Color(165, 42, 42)  # Food
 grey = pygame.Color(40, 40, 40)  # Border
 
 # fonts
+pygame.init()
 snake_font = pygame.font.Font('freesansbold.ttf', int(window_w_in_pixels / 20))
 
 # =====================================================================================================================
 # ============================================ GAME PROCESSING VARIABLE================================================
-pygame.init()
 play_surface = pygame.display.set_mode((window_w_in_pixels, window_h_in_pixels))
 fps_controller = pygame.time.Clock()
 
@@ -143,12 +141,9 @@ class Game:
                 pygame.quit()
                 sys.exit()
             elif self.GAME_CONDITION == "RUNNING":
-                # if event.key == ord('p'):  # pause the game
-                #     self.GAME_CONDITION = "PAUSE"
-                #     break
-                # elif event.key == ord('o'):  # run game back from pause
-                #     self.GAME_CONDITION = "RUNNING"
-                #     break
+                if event.key == ord('p'):  # pause the game
+                    self.GAME_CONDITION = "PAUSE"
+                    break
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RIGHT or event.key == ord('d'):
                         pressed_key = 'RIGHT'
@@ -165,6 +160,10 @@ class Game:
                     if event.key == pygame.K_RSHIFT or event.key == pygame.K_LSHIFT:
                         self.speed -= 5
                 break
+            elif self.GAME_CONDITION == "PAUSE":
+                if event.type == pygame.KEYDOWN and event.key == ord('o'):  # run game back from pause
+                    self.GAME_CONDITION = "RUNNING"
+                    break
 
             elif self.GAME_CONDITION in ("WAITING", "GAME OVER"):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -298,7 +297,7 @@ class BonusFood(Food):
             self.timer = None
 
 
-def start_test_game():
+def start_game():
     snake = Snake()
     game = Game()
     food = Food()
@@ -342,23 +341,14 @@ def start_test_game():
         game.draw_screen(snake, food, bonus_food)
 
 
-def start_game():
-    while True:
-        show_menu_screen()
-        run_game()
-
-
 if __name__ == '__main__':
     # TODO:
+    #  - find a way to clear event loop after getting key_press
+    #  - find a way to separate FPS and game_speed
     #  - add option to play with|without border
     #  - save score in DB with name
     #  - see top 10 cores with names
     #  - add option to choose cell size
     #  - add sound and music
 
-    if DEBUG:
-        start_test_game()
-        import pygame
-        pygame.init()
-    else:
-        start_game()
+    start_game()
