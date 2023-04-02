@@ -27,6 +27,7 @@ black = pygame.Color(0, 0, 0)  # Score and level
 white = pygame.Color(240, 255, 255)  # Background
 brown = pygame.Color(165, 42, 42)  # Food
 grey = pygame.Color(40, 40, 40)  # Border
+grey_1 = pygame.Color(41, 40, 40)  # Border
 
 # fonts
 pygame.init()
@@ -120,7 +121,7 @@ class Game:
                              (x, cell_size / 2),
                              (x, window_h_in_pixels - cell_size / 2))
         for y in range(int(cell_size / 2), window_h_in_pixels, cell_size):  # draw horizontal lines
-            pygame.draw.line(play_surface, grey,
+            pygame.draw.line(play_surface, grey_1,
                              (cell_size / 2, y),
                              (window_w_in_pixels - cell_size / 2, y))
 
@@ -132,6 +133,7 @@ class Game:
         play_surface.blit(pause_surf, pause_rect)
 
     # ============================================== GAME MECHANISM ==================================================
+
 
     def get_key_press(self):
         pressed_key = None
@@ -278,6 +280,7 @@ class BonusFood(Food):
         10: 'pictures/white10.png',
         20: 'pictures/white20.png',
         40: 'pictures/white40.png',
+        50: 'pictures/white40.png',
     }
 
     def __init__(self):
