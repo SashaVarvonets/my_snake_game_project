@@ -4,6 +4,8 @@ import time
 import random
 import pygame
 
+from colors import *
+
 DEBUG = int(os.environ.get('DEBUG', '0'))
 
 # ============================================= GAME DRAWING VARIABLES =================================================
@@ -18,16 +20,6 @@ assert window_w_in_pixels % cell_size == 0, "Window width must be a multiple of 
 assert window_h_in_pixels % cell_size == 0, "Window height must be a multiple of cell size."
 window_w_in_cells = int(window_w_in_pixels / cell_size)
 window_h_in_cells = int(window_h_in_pixels / cell_size)
-
-# Colors RGB
-red = pygame.Color(255, 0, 0)  # Game over
-green = pygame.Color(0, 255, 0)  # Snake body
-dark_green = pygame.Color(0, 100, 0)  # Snake head
-black = pygame.Color(0, 0, 0)  # Score and level
-white = pygame.Color(240, 255, 255)  # Background
-brown = pygame.Color(165, 42, 42)  # Food
-grey = pygame.Color(40, 40, 40)  # Border
-grey_1 = pygame.Color(41, 40, 40)  # Border
 
 # fonts
 pygame.init()
